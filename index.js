@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -29,11 +29,30 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const artsDatebase = client.db("artsDB").collection("arts");
+    const artsDatabase = client.db("artsDB").collection("arts");
+
+    app.get("/arts", async (req, res) => {
+      const cursor = artsDatabase.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/artItems", async (req, res) => {
+      const cursor = artsDatabase.find().limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/arts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await artsDatabase.findOne(query);
+      res.send(result);
+    });
 
     app.post("/arts", async (req, res) => {
       const addedArt = req.body;
-      const result = await artsDatebase.insertOne(addedArt);
+      const result = await artsDatabase.insertOne(addedArt);
       res.send(result);
     });
 
