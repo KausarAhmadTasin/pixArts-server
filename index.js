@@ -37,12 +37,6 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/artItems", async (req, res) => {
-      const cursor = artsDatabase.find().limit(6);
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-
     app.get("/arts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -50,9 +44,24 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/myArts/:user", async (req, res) => {
+      const user = req.params.user;
+      const query = {
+        userEmail: user,
+      };
+      const result = await artsDatabase.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/arts", async (req, res) => {
       const addedArt = req.body;
       const result = await artsDatabase.insertOne(addedArt);
+      res.send(result);
+    });
+
+    app.get("/artItems", async (req, res) => {
+      const cursor = artsDatabase.find().limit(6);
+      const result = await cursor.toArray();
       res.send(result);
     });
 
