@@ -29,10 +29,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const artsDatabase = client.db("artsDB").collection("arts");
+    const artsCollection = client.db("artsDB").collection("arts");
 
     app.get("/arts", async (req, res) => {
-      const cursor = artsDatabase.find();
+      const cursor = artsCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -40,7 +40,7 @@ async function run() {
     app.get("/arts/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await artsDatabase.findOne(query);
+      const result = await artsCollection.findOne(query);
       res.send(result);
     });
 
@@ -49,18 +49,38 @@ async function run() {
       const query = {
         userEmail: user,
       };
-      const result = await artsDatabase.find(query).toArray();
+      const result = await artsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/myArts/:user/:id", async (req, res) => {
+      const user = req.params.user;
+      const artId = req.params.id;
+      const query = {
+        userEmail: user,
+        _id: new ObjectId(artId),
+      };
+      const result = await artsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.get("/category/:catName", async (req, res) => {
+      const category = req.params.catName;
+      const query = {
+        "selectedSubCategory.value": category,
+      };
+      const result = await artsCollection.find(query).toArray();
       res.send(result);
     });
 
     app.post("/arts", async (req, res) => {
       const addedArt = req.body;
-      const result = await artsDatabase.insertOne(addedArt);
+      const result = await artsCollection.insertOne(addedArt);
       res.send(result);
     });
 
     app.get("/artItems", async (req, res) => {
-      const cursor = artsDatabase.find().limit(6);
+      const cursor = artsCollection.find().limit(6);
       const result = await cursor.toArray();
       res.send(result);
     });
